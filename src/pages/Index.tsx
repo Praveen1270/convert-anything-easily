@@ -15,14 +15,13 @@ const Index = () => {
               className="w-full max-w-4xl mx-auto rounded-2xl shadow-2xl" 
             />
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-primary-glow to-convert-accent bg-clip-text text-transparent leading-tight">
-            Convert Any File
-            <br />
-            <span className="text-4xl md:text-5xl">Instantly</span>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            Convert your{' '}
+            <span className="bg-yellow-300 text-black px-3 py-1 rounded-lg">files</span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-            Transform your files between formats with our powerful, secure converter. 
-            Support for images, documents, text files, and more.
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
+            Drag and drop to convert <strong>videos, images, audio,</strong> and <strong>documents</strong> locally. 
+            Convert HEIC to JPG, MP4 to MP3, Word to PDF, shrink your file size and more. Try the demo or scroll to see why you should get the app.
           </p>
         </div>
       </section>

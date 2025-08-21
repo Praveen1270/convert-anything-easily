@@ -137,8 +137,12 @@ export const FileConverter: React.FC = () => {
         convertedBlob = await convertImageFile(selectedFile, selectedFormat);
       } else if (selectedFile.type.startsWith('text/') || selectedFile.type === 'application/json') {
         convertedBlob = await convertTextFile(selectedFile, selectedFormat);
+      } else if (selectedFile.type.startsWith('video/') || selectedFile.type.startsWith('audio/')) {
+        throw new Error('Video and audio conversions require server-side processing and are not available in this demo version.');
+      } else if (selectedFile.type.includes('document') || selectedFile.type === 'application/pdf') {
+        throw new Error('Document conversions require server-side processing and are not available in this demo version.');
       } else {
-        throw new Error('Unsupported file type');
+        throw new Error('This file type conversion is not supported in the current demo version.');
       }
 
       clearInterval(progressInterval);
@@ -159,7 +163,7 @@ export const FileConverter: React.FC = () => {
       
       toast({
         title: "Conversion failed",
-        description: "There was an error converting your file.",
+        description: err instanceof Error ? err.message : "There was an error converting your file.",
         variant: "destructive",
       });
     }
@@ -185,60 +189,82 @@ export const FileConverter: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
+    <div className="w-full max-w-6xl mx-auto space-y-6">
       <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-            Universal File Converter
-          </CardTitle>
-          <p className="text-muted-foreground mt-2">
-            Convert your files to any format - fast, secure, and free
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <FileUpload
-            onFileSelect={handleFileSelect}
-            selectedFile={selectedFile}
-            onRemoveFile={handleRemoveFile}
-          />
-
-          {selectedFile && (
-            <FormatSelector
-              selectedFormat={selectedFormat}
-              onFormatChange={setSelectedFormat}
-              inputFormat={selectedFile.type}
+        <CardContent className="p-8">
+          {!selectedFile ? (
+            <FileUpload
+              onFileSelect={handleFileSelect}
+              selectedFile={selectedFile}
+              onRemoveFile={handleRemoveFile}
             />
-          )}
+          ) : (
+            <div className="space-y-6">
+              {/* File info and actions */}
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="text-sm font-medium">{selectedFile.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemoveFile}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Remove
+                </Button>
+              </div>
 
-          {selectedFile && selectedFormat && conversionStatus === 'idle' && (
-            <div className="text-center">
-              <Button
-                onClick={handleConvert}
-                className="convert-button px-8 py-3 text-lg font-semibold"
-                size="lg"
-              >
-                <Zap className="w-5 h-5 mr-2" />
-                Convert File
-              </Button>
-            </div>
-          )}
+              {/* Conversion interface */}
+              <div className="grid md:grid-cols-2 gap-8 items-start">
+                {/* Left side - Format selector */}
+                <FormatSelector
+                  selectedFormat={selectedFormat}
+                  onFormatChange={setSelectedFormat}
+                  inputFormat={selectedFile.type}
+                />
 
-          <ConversionProgress
-            status={conversionStatus}
-            progress={progress}
-            error={error}
-          />
+                {/* Right side - Convert section */}
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Select the output format and click Convert
+                    </p>
+                    {selectedFormat && conversionStatus === 'idle' && (
+                      <Button
+                        onClick={handleConvert}
+                        className="convert-button px-8 py-3 text-lg font-semibold w-full"
+                        size="lg"
+                      >
+                        <Zap className="w-5 h-5 mr-2" />
+                        Convert
+                      </Button>
+                    )}
+                  </div>
 
-          {conversionStatus === 'completed' && convertedFileUrl && (
-            <div className="text-center">
-              <Button
-                onClick={handleDownload}
-                className="bg-success hover:bg-success/90 text-success-foreground px-8 py-3 text-lg font-semibold"
-                size="lg"
-              >
-                <Download className="w-5 h-5 mr-2" />
-                Download Converted File
-              </Button>
+                  <ConversionProgress
+                    status={conversionStatus}
+                    progress={progress}
+                    error={error}
+                  />
+
+                  {conversionStatus === 'completed' && convertedFileUrl && (
+                    <div className="text-center">
+                      <Button
+                        onClick={handleDownload}
+                        className="bg-success hover:bg-success/90 text-success-foreground px-8 py-3 text-lg font-semibold w-full"
+                        size="lg"
+                      >
+                        <Download className="w-5 h-5 mr-2" />
+                        Download Converted File
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </CardContent>

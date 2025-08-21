@@ -9,30 +9,75 @@ interface FormatSelectorProps {
   inputFormat: string;
 }
 
-const SUPPORTED_CONVERSIONS: Record<string, string[]> = {
+const SUPPORTED_CONVERSIONS: Record<string, { category: string; formats: string[] }> = {
   // Image formats
-  'image/png': ['jpg', 'webp', 'gif', 'bmp'],
-  'image/jpeg': ['png', 'webp', 'gif', 'bmp'],
-  'image/jpg': ['png', 'webp', 'gif', 'bmp'],
-  'image/webp': ['png', 'jpg', 'gif', 'bmp'],
-  'image/gif': ['png', 'jpg', 'webp', 'bmp'],
-  'image/bmp': ['png', 'jpg', 'webp', 'gif'],
+  'image/png': { category: 'Image Converter', formats: ['jpg', 'webp', 'gif', 'bmp', 'heic'] },
+  'image/jpeg': { category: 'Image Converter', formats: ['png', 'webp', 'gif', 'bmp', 'heic'] },
+  'image/jpg': { category: 'Image Converter', formats: ['png', 'webp', 'gif', 'bmp', 'heic'] },
+  'image/webp': { category: 'Image Converter', formats: ['png', 'jpg', 'gif', 'bmp', 'heic'] },
+  'image/gif': { category: 'Image Converter', formats: ['png', 'jpg', 'webp', 'bmp'] },
+  'image/bmp': { category: 'Image Converter', formats: ['png', 'jpg', 'webp', 'gif'] },
+  'image/heic': { category: 'Image Converter', formats: ['jpg', 'png', 'webp'] },
+  
+  // Video formats
+  'video/mp4': { category: 'Video Converter', formats: ['mov', 'avi', 'webm', 'gif', 'mp3'] },
+  'video/mov': { category: 'Video Converter', formats: ['mp4', 'avi', 'webm', 'gif', 'mp3'] },
+  'video/avi': { category: 'Video Converter', formats: ['mp4', 'mov', 'webm', 'gif', 'mp3'] },
+  'video/webm': { category: 'Video Converter', formats: ['mp4', 'mov', 'avi', 'gif', 'mp3'] },
+  
+  // Audio formats
+  'audio/mp3': { category: 'Audio Converter', formats: ['wav', 'aac', 'flac', 'ogg'] },
+  'audio/wav': { category: 'Audio Converter', formats: ['mp3', 'aac', 'flac', 'ogg'] },
+  'audio/aac': { category: 'Audio Converter', formats: ['mp3', 'wav', 'flac', 'ogg'] },
+  'audio/flac': { category: 'Audio Converter', formats: ['mp3', 'wav', 'aac', 'ogg'] },
+  'audio/ogg': { category: 'Audio Converter', formats: ['mp3', 'wav', 'aac', 'flac'] },
+  
+  // Document formats
+  'application/pdf': { category: 'Document & Ebook', formats: ['docx', 'txt', 'html'] },
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': { category: 'Document & Ebook', formats: ['pdf', 'txt', 'html', 'docx'] },
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': { category: 'Document & Ebook', formats: ['csv', 'xlsx', 'txt'] },
+  'text/markdown': { category: 'Document & Ebook', formats: ['epub', 'html', 'pdf', 'txt'] },
   
   // Text formats
-  'text/plain': ['json', 'csv', 'xml'],
-  'application/json': ['txt', 'csv', 'xml'],
-  'text/csv': ['txt', 'json', 'xml'],
-  'application/xml': ['txt', 'json', 'csv'],
-  'text/xml': ['txt', 'json', 'csv'],
+  'text/plain': { category: 'Document & Ebook', formats: ['json', 'csv', 'xml', 'html', 'md'] },
+  'application/json': { category: 'Document & Ebook', formats: ['txt', 'csv', 'xml'] },
+  'text/csv': { category: 'Document & Ebook', formats: ['txt', 'json', 'xml', 'xlsx'] },
+  'application/xml': { category: 'Document & Ebook', formats: ['txt', 'json', 'csv'] },
+  'text/xml': { category: 'Document & Ebook', formats: ['txt', 'json', 'csv'] },
 };
 
 const FORMAT_LABELS: Record<string, string> = {
+  // Images
   'png': 'PNG Image',
-  'jpg': 'JPG Image',
+  'jpg': 'JPG Image', 
   'jpeg': 'JPEG Image',
   'webp': 'WebP Image',
   'gif': 'GIF Image',
   'bmp': 'BMP Image',
+  'heic': 'HEIC Image',
+  
+  // Video
+  'mp4': 'MP4 Video',
+  'mov': 'MOV Video',
+  'avi': 'AVI Video',
+  'webm': 'WebM Video',
+  
+  // Audio
+  'mp3': 'MP3 Audio',
+  'wav': 'WAV Audio',
+  'aac': 'AAC Audio',
+  'flac': 'FLAC Audio',
+  'ogg': 'OGG Audio',
+  
+  // Documents
+  'pdf': 'PDF Document',
+  'docx': 'Word Document',
+  'xlsx': 'Excel Spreadsheet',
+  'epub': 'ePub Ebook',
+  'html': 'HTML Document',
+  'md': 'Markdown File',
+  
+  // Text
   'txt': 'Text File',
   'json': 'JSON File',
   'csv': 'CSV File',
@@ -44,7 +89,9 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   onFormatChange,
   inputFormat,
 }) => {
-  const availableFormats = SUPPORTED_CONVERSIONS[inputFormat] || [];
+  const conversionData = SUPPORTED_CONVERSIONS[inputFormat];
+  const availableFormats = conversionData?.formats || [];
+  const category = conversionData?.category || '';
   const currentFormatName = inputFormat.split('/').pop()?.toUpperCase() || 'Unknown';
 
   if (availableFormats.length === 0) {
@@ -60,36 +107,32 @@ export const FormatSelector: React.FC<FormatSelectorProps> = ({
   }
 
   return (
-    <Card className="file-card">
+    <Card className="file-card border-dashed border-2 border-muted">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Convert Format</CardTitle>
+        <CardTitle className="text-lg font-semibold">{category}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <div className="text-sm text-muted-foreground mb-1">From</div>
-            <div className="px-3 py-2 bg-muted/50 rounded-md font-medium">
-              {currentFormatName}
-            </div>
+        <div className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            Converting from <strong>{currentFormatName}</strong>
           </div>
           
-          <ArrowRight className="w-5 h-5 text-primary flex-shrink-0" />
-          
-          <div className="flex-1">
-            <div className="text-sm text-muted-foreground mb-1">To</div>
-            <Select value={selectedFormat} onValueChange={onFormatChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableFormats.map((format) => (
-                  <SelectItem key={format} value={format}>
-                    {FORMAT_LABELS[format] || format.toUpperCase()}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={selectedFormat} onValueChange={onFormatChange}>
+            <SelectTrigger className="w-full bg-yellow-300 text-black border-yellow-400 hover:bg-yellow-400">
+              <SelectValue placeholder="Select..." />
+            </SelectTrigger>
+            <SelectContent className="bg-background border z-50">
+              {availableFormats.map((format) => (
+                <SelectItem 
+                  key={format} 
+                  value={format}
+                  className="hover:bg-muted cursor-pointer"
+                >
+                  {FORMAT_LABELS[format] || format.toUpperCase()}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
     </Card>
